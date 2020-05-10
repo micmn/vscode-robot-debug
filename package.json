@@ -1,0 +1,146 @@
+{
+	"name": "robot-framework-debug",
+	"displayName": "Robot Framework Debug",
+	"version": "0.1.0",
+	"publisher": "mic.mazzoni",
+	"description": "Extension for debugging Robot Framework tests.",
+	"author": {
+		"name": "Michele Mazzoni",
+		"email": "mic.mazzoni@gmail.com"
+	},
+	"license": "MIT",
+	"engines": {
+		"vscode": "^1.43.0"
+	},
+	"categories": [
+		"Debuggers"
+	],
+	"private": true,
+	"scripts": {
+		"prepublish": "npx copyfiles scripts/TestRunner.py out/",
+		"compile": "npx tsc -p ./src",
+		"tslint": "npx tslint ./src/**/*.ts",
+		"watch": "npx tsc -w -p ./src",
+		"test": "npx mocha -u bdd ./out/tests/",
+		"coverage": "npx nyc --show-process-tree mocha -u bdd ./out/tests/",
+		"package": "npx vsce package",
+		"publish": "npx vsce publish",
+		"py-test": "py -3 -m unittest discover -s ./scripts/tests",
+		"py-coverage": "py -3 -m coverage run --source=./scripts -m unittest discover -s ./scripts/tests ; py -3 -m coverage html --omit='tests*'"
+	},
+	"nyc": {
+		"extension": [
+			".ts",
+			".js",
+			".tsx"
+		],
+		"exclude": [
+			"**/*.d.ts",
+			"**/tests/*",
+			"coverage/**"
+		],
+		"reporter": [
+			"text",
+			"html"
+		],
+		"all": true
+	},
+	"dependencies": {
+		"await-notify": "1.0.1",
+		"vscode-debugadapter": "1.40.0"
+	},
+	"devDependencies": {
+		"@stryker-mutator/core": "^3.1.0",
+		"@stryker-mutator/mocha-framework": "^3.1.0",
+		"@stryker-mutator/mocha-runner": "^3.1.0",
+		"@stryker-mutator/typescript": "^3.1.0",
+		"@types/expect.js": "^0.3.29",
+		"@types/fs-extra": "^8.1.0",
+		"@types/mocha": "5.2.7",
+		"@types/node": "10.12.12",
+		"@types/tmp": "^0.2.0",
+		"@types/vscode": "^1.43.0",
+		"copyfiles": "^2.2.0",
+		"expect.js": "^0.3.1",
+		"fs-extra": "^9.0.0",
+		"mocha": "6.2.0",
+		"nyc": "^15.0.1",
+		"tmp": "^0.2.1",
+		"tslint": "5.18.0",
+		"typescript": "3.5.3",
+		"vsce": "1.74.0",
+		"vscode-debugadapter-testsupport": "1.40.3"
+	},
+	"main": "./out/extension",
+	"activationEvents": [
+		"onDebug",
+		"onCommand:extension.rf-debug.getSuiteName"
+	],
+	"contributes": {
+		"breakpoints": [
+			{
+				"language": "robot"
+			}
+		],
+		"debuggers": [
+			{
+				"type": "robot",
+				"label": "Robot Framework",
+				"languages": [
+					"robot"
+				],
+				"program": "./out/debugAdapter.js",
+				"runtime": "node",
+				"configurationAttributes": {
+					"launch": {
+						"required": [
+							"suite"
+						],
+						"properties": {
+							"suite": {
+								"type": "string",
+								"description": "Absolute path to a robot test suite.",
+								"default": "${workspaceFolder}/${command:AskForSuiteName}"
+							},
+							"stopOnEntry": {
+								"type": "boolean",
+								"description": "Automatically stop after launch.",
+								"default": false
+							},
+							"trace": {
+								"type": "boolean",
+								"description": "Enable logging of the Debug Adapter Protocol.",
+								"default": true
+							}
+						}
+					}
+				},
+				"initialConfigurations": [
+					{
+						"type": "robot",
+						"request": "launch",
+						"name": "Robot Test",
+						"suite": "${workspaceFolder}/${command:AskForSuiteName}",
+						"stopOnEntry": false
+					}
+				],
+				"configurationSnippets": [
+					{
+						"label": "Robot Framework Debug: Launch",
+						"description": "A new configuration for 'debugging' a user selected test file.",
+						"body": {
+							"type": "robot",
+							"request": "launch",
+							"name": "Robot Test",
+							"suite": "^\"\\${workspaceFolder}/\\${command:AskForSuiteName}\"",
+							"stopOnEntry": false
+						}
+					}
+				],
+				"variables": {
+					"AskForSuiteName": "extension.rf-debug.getSuiteName"
+				}
+			}
+		]
+	}
+}

@@ -1,0 +1,12 @@
+.DS_Store
+node_modules/
+out/
+npm-debug.log
+*.vsix
+*.log
+
+.nyc_output
+.vscode
+.vscodeignore
+coverage/
+__pycache__/
