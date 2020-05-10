@@ -11,14 +11,16 @@ describe('Test Runner Launcher', () => {
 
 	const PORT = 5005;
 	const HOSTNAME = 'localhost';
+	const STOP_ON_ENTRY = false;
 
 	it('Launch python test runner', (done) => {
 		const {name: workDir} = tmp.dirSync();
-		const runnerLauncher = new RunnerLauncher(RUNNER_PATH, PORT, HOSTNAME, TESTPATH, workDir);
+		const runnerLauncher = new RunnerLauncher(RUNNER_PATH, PORT, HOSTNAME, STOP_ON_ENTRY, TESTPATH, workDir);
 		runnerLauncher.on('exit', (code) => {
 			expect(code).eql(0);
 			const contents = fs.readFileSync(path.join(workDir, 'args.txt'), 'utf-8');
-			expect(contents).eql(`${HOSTNAME} ${PORT} ${TESTPATH}`);
+			const stopOnEntry = STOP_ON_ENTRY ? 'stop' : 'run';
+			expect(contents).eql(`${HOSTNAME} ${PORT} ${stopOnEntry} ${TESTPATH}`);
 			fs.removeSync(workDir);
 			done();
 		});

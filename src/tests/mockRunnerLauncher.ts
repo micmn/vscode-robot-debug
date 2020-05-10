@@ -4,7 +4,7 @@ import { Socket } from "net";
 import { PacketType } from "../runnerConnector";
 import { RunnerMessage, DebuggerMessage } from "../protocol";
 
-export class MockRunnerLauncher extends EventEmitter implements IRunnerLauncher {
+export class MockRunner extends EventEmitter implements IRunnerLauncher {
 	private client: Socket;
 	private connected: boolean = false;
 	private reqId: number = 0;

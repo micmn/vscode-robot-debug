@@ -84,14 +84,21 @@ describe('Test Robot Debug Adapter', () => {
 			source: {path: robotTest},
 			breakpoints: [{line: 8}, {line: 14}]
 		});
-		await dc.continueRequest({threadId: THREAD_ID});
-		await waitForStop(8, robotTest, 'breakpoint');
 
-		await dc.continueRequest({threadId: THREAD_ID});
-		await waitForStop(14, robotTest, 'breakpoint');
+		await Promise.all([
+			dc.continueRequest({threadId: THREAD_ID}),
+			waitForStop(8, robotTest, 'breakpoint')
+		]);
 
-		await dc.continueRequest({threadId: THREAD_ID});
-		await dc.waitForEvent('terminated');
+		await Promise.all([
+			dc.continueRequest({threadId: THREAD_ID}),
+			waitForStop(14, robotTest, 'breakpoint')
+		]);
+
+		await Promise.all([
+			dc.continueRequest({threadId: THREAD_ID}),
+			dc.waitForEvent('terminated')
+		]);
 	});
 
 	it('Set and hit two breakpoints in different files', async () => {
@@ -110,14 +117,21 @@ describe('Test Robot Debug Adapter', () => {
 			source: {path: robotTestAux},
 			breakpoints: [{line: 9}]
 		});
-		await dc.continueRequest({threadId: THREAD_ID});
-		await waitForStop(8, robotTest, 'breakpoint');
 
-		await dc.continueRequest({threadId: THREAD_ID});
-		await waitForStop(9, robotTestAux, 'breakpoint');
+		await Promise.all([
+			dc.continueRequest({threadId: THREAD_ID}),
+			waitForStop(8, robotTest, 'breakpoint')
+		]);
 
-		await dc.continueRequest({threadId: THREAD_ID});
-		await dc.waitForEvent('terminated');
+		await Promise.all([
+			dc.continueRequest({threadId: THREAD_ID}),
+			waitForStop(9, robotTestAux, 'breakpoint')
+		]);
+
+		await Promise.all([
+			dc.continueRequest({threadId: THREAD_ID}),
+			dc.waitForEvent('terminated')
+		]);
 	});
 
 	it('Pause and continue test', async () => {
@@ -129,7 +143,10 @@ describe('Test Robot Debug Adapter', () => {
 		]);
 
 		await dc.continueRequest({threadId: THREAD_ID});
-		await dc.pauseRequest({threadId: THREAD_ID});
+		await Promise.all([
+			dc.pauseRequest({threadId: THREAD_ID}),
+			dc.waitForEvent('stopped')
+		]);
 		await dc.continueRequest({threadId: THREAD_ID});
 		await dc.waitForEvent('terminated');
 	});
@@ -147,7 +164,10 @@ describe('Test Robot Debug Adapter', () => {
 		});
 		await dc.continueRequest({threadId: THREAD_ID});
 
-		let stackFrames = await waitForStop(13, robotTest, 'breakpoint');
+		let [,stackFrames] = await Promise.all([
+			dc.continueRequest({threadId: THREAD_ID}),
+			waitForStop(13, robotTest, 'breakpoint')
+		]);
 
 		let scopesResponse = await dc.scopesRequest({frameId: stackFrames[0].id});
 		let varsResponse = await dc.variablesRequest({variablesReference: scopesResponse.body.scopes[0].variablesReference});
@@ -177,8 +197,10 @@ describe('Test Robot Debug Adapter', () => {
 			breakpoints: [{line: 11}, {line: 18}]
 		});
 
-		await dc.continueRequest({threadId: THREAD_ID});
-		let stackFrames = await waitForStop(11, robotTest, 'breakpoint');
+		let [,stackFrames] = await Promise.all([
+			dc.continueRequest({threadId: THREAD_ID}),
+			waitForStop(11, robotTest, 'breakpoint')
+		]);
 
 		let response = await dc.evaluateRequest({
 			expression: 'random_str',
@@ -187,8 +209,10 @@ describe('Test Robot Debug Adapter', () => {
 		});
 		const randomStrValue = response.body.result;
 
-		await dc.continueRequest({threadId: THREAD_ID});
-		stackFrames = await waitForStop(18, robotTest, 'breakpoint');
+		[,stackFrames] = await Promise.all([
+			dc.continueRequest({threadId: THREAD_ID}),
+			waitForStop(18, robotTest, 'breakpoint')
+		]);
 
 		response = await dc.evaluateRequest({
 			expression: 'aaa',
@@ -216,11 +240,16 @@ describe('Test Robot Debug Adapter', () => {
 			source: {path: robotTest},
 			breakpoints: [{line: 8}]
 		});
-		await dc.continueRequest({threadId: THREAD_ID});
 
-		await waitForStop(8, robotTest, 'breakpoint');
-		await dc.nextRequest({threadId: THREAD_ID});
-		await waitForStop(9, robotTest, 'step');
+		await Promise.all([
+			dc.continueRequest({threadId: THREAD_ID}),
+			waitForStop(8, robotTest, 'breakpoint')
+		]);
+
+		await Promise.all([
+			dc.nextRequest({threadId: THREAD_ID}),
+			waitForStop(9, robotTest, 'step')
+		]);
 	});
 
 	it('Step in keyword', async () => {
@@ -234,10 +263,16 @@ describe('Test Robot Debug Adapter', () => {
 			source: {path: robotTest},
 			breakpoints: [{line: 8}]
 		});
-		await dc.continueRequest({threadId: THREAD_ID});
-		await waitForStop(8, robotTest, 'breakpoint');
-		await dc.stepInRequest({threadId: THREAD_ID});
-		await waitForStop(15, robotTest, 'step');
+
+		await Promise.all([
+			dc.continueRequest({threadId: THREAD_ID}),
+			waitForStop(8, robotTest, 'breakpoint')
+		]);
+
+		await Promise.all([
+			dc.stepInRequest({threadId: THREAD_ID}),
+			waitForStop(15, robotTest, 'step')
+		]);
 	});
 
 	it('Step out keyword', async () => {
@@ -251,10 +286,16 @@ describe('Test Robot Debug Adapter', () => {
 			source: {path: robotTest},
 			breakpoints: [{line: 15}]
 		});
-		await dc.continueRequest({threadId: THREAD_ID});
-		await waitForStop(15, robotTest, 'breakpoint');
-		await dc.stepOutRequest({threadId: THREAD_ID});
-		await waitForStop(8, robotTest, 'step');
+
+		await Promise.all([
+			dc.continueRequest({threadId: THREAD_ID}),
+			waitForStop(15, robotTest, 'breakpoint')
+		]);
+
+		await Promise.all([
+			dc.stepOutRequest({threadId: THREAD_ID}),
+			waitForStop(8, robotTest, 'step')
+		]);
 	});
 
 	it('Step out two keywords', async () => {
@@ -268,14 +309,21 @@ describe('Test Robot Debug Adapter', () => {
 			source: {path: robotTest},
 			breakpoints: [{line: 23}]
 		});
-		await dc.continueRequest({threadId: THREAD_ID});
-		await waitForStop(23, robotTest, 'breakpoint');
 
-		await dc.stepOutRequest({threadId: THREAD_ID});
-		await waitForStop(17, robotTest, 'step');
+		await Promise.all([
+			dc.continueRequest({threadId: THREAD_ID}),
+			waitForStop(23, robotTest, 'breakpoint')
+		]);
 
-		await dc.stepOutRequest({threadId: THREAD_ID});
-		await waitForStop(8, robotTest, 'step');
+		await Promise.all([
+			dc.stepOutRequest({threadId: THREAD_ID}),
+			waitForStop(17, robotTest, 'step')
+		]);
+
+		await Promise.all([
+			dc.stepOutRequest({threadId: THREAD_ID}),
+			waitForStop(8, robotTest, 'step')
+		]);
 	});
 
 	it('Step in/over/out keyword', async () => {
@@ -289,16 +337,25 @@ describe('Test Robot Debug Adapter', () => {
 			source: {path: robotTest},
 			breakpoints: [{line: 8}]
 		});
-		await dc.continueRequest({threadId: THREAD_ID});
-		await waitForStop(8, robotTest, 'breakpoint');
 
-		await dc.stepInRequest({threadId: THREAD_ID});
-		await waitForStop(15, robotTest, 'step');
+		await Promise.all([
+			dc.continueRequest({threadId: THREAD_ID}),
+			waitForStop(8, robotTest, 'breakpoint')
+		]);
 
-		await dc.nextRequest({threadId: THREAD_ID});
-		await waitForStop(16, robotTest, 'step');
+		await Promise.all([
+			dc.stepInRequest({threadId: THREAD_ID}),
+			waitForStop(15, robotTest, 'step')
+		]);
 
-		await dc.stepOutRequest({threadId: THREAD_ID});
-		await waitForStop(8, robotTest, 'step');
+		await Promise.all([
+			dc.nextRequest({threadId: THREAD_ID}),
+			waitForStop(16, robotTest, 'step')
+		]);
+
+		await Promise.all([
+			dc.stepOutRequest({threadId: THREAD_ID}),
+			waitForStop(8, robotTest, 'step')
+		]);
 	});
 });

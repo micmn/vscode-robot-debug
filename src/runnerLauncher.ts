@@ -15,7 +15,8 @@ export class RunnerLauncher extends EventEmitter implements IRunnerLauncher {
 	private executableArgs: string[] = [];
 
 	constructor(private runnerPath: string, private port: number, private hostname: string,
-				private suite: string, private workdir: string = Path.dirname(suite)) {
+				private stopOnEntry: boolean, private suite: string,
+				private workdir: string = Path.dirname(suite)) {
 			super();
 			if (os.platform() === 'win32') {
 				this.executable = 'py';
@@ -27,7 +28,11 @@ export class RunnerLauncher extends EventEmitter implements IRunnerLauncher {
 		}
 
 	public start() {
-		const args = [...this.executableArgs, this.runnerPath, this.hostname, this.port.toString(), this.suite];
+		const stopOnEntry = this.stopOnEntry ? "stop" : "run";
+		const args = [
+			...this.executableArgs, this.runnerPath, this.hostname,
+			this.port.toString(), stopOnEntry, this.suite
+		];
 		logger.log(`Spawning child process ${this.executable} ${args.toString()} with working directory ${this.workdir}`);
 		this.robotProcess = spawn(this.executable, args, {
 			cwd: this.workdir

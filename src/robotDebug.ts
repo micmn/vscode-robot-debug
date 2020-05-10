@@ -118,13 +118,11 @@ export class RobotDebugSession extends LoggingDebugSession {
 		const port = 5544;
 
 		this.runnerConnector = new RunnerConnector(
-			new RunnerLauncher(RobotDebugSession.RUNNER_PATH, port, hostname, suite), port, hostname);
+			new RunnerLauncher(RobotDebugSession.RUNNER_PATH, port, hostname, stopOnEntry, suite),
+			port, hostname);
 
 		// setup event handlers
 		this.runnerConnector.on('stopOnEntry', () => {
-			if (!stopOnEntry) {
-				this.runnerConnector.request(DebuggerMessage.Continue);
-			}
 			this.sendEvent(new StoppedEvent('entry', RobotDebugSession.THREAD_ID));
 		});
 		this.runnerConnector.on('stopOnStep', () => {

@@ -5,13 +5,13 @@ import { RunnerConnector, PacketType } from "../runnerConnector";
 // import * as tmp from "tmp";
 import expect = require("expect.js");
 import { DebuggerMessage, DebuggerSetBreakpointsReply, RunnerMessage } from "../protocol";
-import { MockRunnerLauncher } from "./mockRunnerLauncher";
+import { MockRunner } from "./mockRunnerLauncher";
 
 describe('Test Runner Connector', () => {
 
 	const PORT = 5005;
 	const HOSTNAME = 'localhost';
-	let mockRunner: MockRunnerLauncher;
+	let mockRunner: MockRunner;
 	let connector: RunnerConnector;
 
 	afterEach('Close mock runner', () => {
@@ -21,7 +21,7 @@ describe('Test Runner Connector', () => {
 	});
 
 	it('Connect to test runner', done => {
-		mockRunner = new MockRunnerLauncher(PORT, HOSTNAME);
+		mockRunner = new MockRunner(PORT, HOSTNAME);
 		connector = new RunnerConnector(mockRunner, PORT, HOSTNAME);
 		let connected = false;
 		connector.on('connected', () => {
@@ -37,7 +37,7 @@ describe('Test Runner Connector', () => {
 	});
 
 	it('Send request without arguments', done => {
-		mockRunner = new MockRunnerLauncher(PORT, HOSTNAME);
+		mockRunner = new MockRunner(PORT, HOSTNAME);
 		connector = new RunnerConnector(mockRunner, PORT, HOSTNAME);
 		let reply = false;
 		connector.on('connected', () => {
@@ -54,7 +54,7 @@ describe('Test Runner Connector', () => {
 	});
 
 	it('Send request with arguments', done => {
-		mockRunner = new MockRunnerLauncher(PORT, HOSTNAME);
+		mockRunner = new MockRunner(PORT, HOSTNAME);
 		connector = new RunnerConnector(mockRunner, PORT, HOSTNAME);
 		let reply = false;
 		connector.on('connected', () => {
@@ -77,7 +77,7 @@ describe('Test Runner Connector', () => {
 	});
 
 	it('Receive reply with wrong id', done => {
-		mockRunner = new MockRunnerLauncher(PORT, HOSTNAME);
+		mockRunner = new MockRunner(PORT, HOSTNAME);
 		connector = new RunnerConnector(mockRunner, PORT, HOSTNAME);
 		connector.on('connected', () => {
 			mockRunner.sendPacket(
@@ -91,7 +91,7 @@ describe('Test Runner Connector', () => {
 	});
 
 	it('Receive reply with wrong packet type', done => {
-		mockRunner = new MockRunnerLauncher(PORT, HOSTNAME);
+		mockRunner = new MockRunner(PORT, HOSTNAME);
 		connector = new RunnerConnector(mockRunner, PORT, HOSTNAME);
 		connector.on('connected', () => {
 			mockRunner.sendPacket(
@@ -105,7 +105,7 @@ describe('Test Runner Connector', () => {
 	});
 
 	it('Receive unkown request', done => {
-		mockRunner = new MockRunnerLauncher(PORT, HOSTNAME);
+		mockRunner = new MockRunner(PORT, HOSTNAME);
 		connector = new RunnerConnector(mockRunner, PORT, HOSTNAME);
 		connector.on('connected', () => {
 			mockRunner.sendPacket(
@@ -119,7 +119,7 @@ describe('Test Runner Connector', () => {
 	});
 
 	it('Send request before runner is connected', done => {
-		mockRunner = new MockRunnerLauncher(PORT, HOSTNAME);
+		mockRunner = new MockRunner(PORT, HOSTNAME);
 		connector = new RunnerConnector(mockRunner, PORT, HOSTNAME);
 		let reply = false;
 		connector.on('close', () => {
@@ -134,7 +134,7 @@ describe('Test Runner Connector', () => {
 	});
 
 	it('Receive stop on breakpoint request from runner', done => {
-		mockRunner = new MockRunnerLauncher(PORT, HOSTNAME);
+		mockRunner = new MockRunner(PORT, HOSTNAME);
 		connector = new RunnerConnector(mockRunner, PORT, HOSTNAME);
 		let received = false;
 		connector.on('connected', () => {
@@ -152,7 +152,7 @@ describe('Test Runner Connector', () => {
 	});
 
 	it('Receive stop on step request from runner', done => {
-		mockRunner = new MockRunnerLauncher(PORT, HOSTNAME);
+		mockRunner = new MockRunner(PORT, HOSTNAME);
 		connector = new RunnerConnector(mockRunner, PORT, HOSTNAME);
 		let received = false;
 		connector.on('connected', () => {

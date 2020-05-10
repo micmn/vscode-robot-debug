@@ -50,13 +50,13 @@ def normPath(path):
     return os.path.normpath(path).lower()
 
 class TestRunner:
-    def __init__(self, host, port):
+    def __init__(self, host, port, stop):
         self._logFile = open('./TestRunner.log', 'a')
         # self._logFile = sys.stderr
         self._log(host, port)
         self._install_run_suite()
         self._connect(host, port)
-        self._state = State.PAUSED_ON_ENTRY
+        self._state = State.PAUSED_ON_ENTRY if stop else State.RUNNING
         self._pauseAtFrame = 0
         self._messages = []
         self._messageEvent = threading.Event()
@@ -82,7 +82,8 @@ class TestRunner:
             DebuggerMessage.VARIABLES: self._onVariablesRequest,
             DebuggerMessage.EVALUATE: self._onEvaluateRequest,
         }
-        self._request(RunnerMessage.STOP_ON_ENTRY)
+        if stop:
+            self._request(RunnerMessage.STOP_ON_ENTRY)
 
     def _log(self, *args):
         print("TestRunner.py:", *args, file=self._logFile)
@@ -97,7 +98,7 @@ class TestRunner:
         return self._state == State.PAUSED or self._state == State.PAUSED_ON_ENTRY
 
     def _onPauseRequest(self, req_id, args):
-        self._state = State.PAUSED
+        self._state = State.PAUSE_AT_STEP
         self._reply(req_id)
 
     def _onContinueRequest(self, req_id, args):
@@ -363,7 +364,7 @@ class TestRunner:
         # self._socket.close()
 
 if __name__ == '__main__':
-    TestRunner(sys.argv[1], int(sys.argv[2]))
-    rc = robot.run_cli(sys.argv[3:], False)
+    TestRunner(sys.argv[1], int(sys.argv[2]), sys.argv[3] == 'stop')
+    rc = robot.run_cli(sys.argv[4:], False)
     TestRunner.close()
     sys.exit(rc)
