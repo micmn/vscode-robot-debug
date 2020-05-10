@@ -18,6 +18,7 @@ class DebuggerMessage:
     SET_BREAKPOINTS = 'SET_BREAKPOINTS'
     CLEAR_BREAKPOINTS = 'CLEAR_BREAKPOINTS'
     VARIABLES = 'VARIABLES'
+    EVALUATE = 'EVALUATE'
 
 class RunnerMessage:
     CALL_STACK = 'CALL_STACK'
@@ -79,6 +80,7 @@ class TestRunner:
             DebuggerMessage.CALL_STACK: self._onCallStackRequest,
             DebuggerMessage.SET_BREAKPOINTS: self._onSetBreakpointsRequest,
             DebuggerMessage.VARIABLES: self._onVariablesRequest,
+            DebuggerMessage.EVALUATE: self._onEvaluateRequest,
         }
         self._request(RunnerMessage.STOP_ON_ENTRY)
 
@@ -142,6 +144,18 @@ class TestRunner:
             if name != '&{SUITE_METADATA}':
                 variables.append({'name': name, 'value': str(vars_dict[name])})
         self._reply(req_id, {'variables': variables})
+
+    def _onEvaluateRequest(self, req_id, args):
+        frame_id = args['frame_id']
+        expression = args['expression']
+        self._log("EVALUATE REQUEST", frame_id, expression)
+        frame_vars = self._runner._variables._scopes[1+frame_id]
+        try:
+            value = json.dumps(frame_vars['${'+expression+'}'])
+        except:
+            self._reply(req_id, {})
+        else:
+            self._reply(req_id, {'value': value})
 
     def _recvThread(self):
         while True:

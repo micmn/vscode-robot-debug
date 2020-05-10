@@ -262,7 +262,7 @@ export class RobotDebugSession extends LoggingDebugSession {
 		this.sendResponse(response);
 	}
 
-	protected async variablesRequest(response: DebugProtocol.VariablesResponse, args: DebugProtocol.VariablesArguments, request?: DebugProtocol.Request) {
+	protected variablesRequest(response: DebugProtocol.VariablesResponse, args: DebugProtocol.VariablesArguments, request?: DebugProtocol.Request) {
 
 		const frameId = this.variableHandles.get(args.variablesReference);
 
@@ -301,51 +301,22 @@ export class RobotDebugSession extends LoggingDebugSession {
 		this.sendResponse(response);
 	}
 
-	// protected evaluateRequest(response: DebugProtocol.EvaluateResponse, args: DebugProtocol.EvaluateArguments): void {
-
-		// let reply: string | undefined = undefined;
-
-		// if (args.context === 'repl') {
-		// 	// 'evaluate' supports to create and delete breakpoints from the 'repl':
-		// 	const matches = /new +([0-9]+)/.exec(args.expression);
-		// 	if (matches && matches.length === 2) {
-		// 		const mbp = this._runtime.setBreakPoint(this._runtime.sourceFile, this.convertClientLineToDebugger(parseInt(matches[1])));
-		// 		const bp = <DebugProtocol.Breakpoint> new Breakpoint(mbp.verified, this.convertDebuggerLineToClient(mbp.line), undefined, this.createSource(this._runtime.sourceFile));
-		// 		bp.id= mbp.id;
-		// 		this.sendEvent(new BreakpointEvent('new', bp));
-		// 		reply = `breakpoint created`;
-		// 	} else {
-		// 		const matches = /del +([0-9]+)/.exec(args.expression);
-		// 		if (matches && matches.length === 2) {
-		// 			const mbp = this._runtime.clearBreakPoint(this._runtime.sourceFile, this.convertClientLineToDebugger(parseInt(matches[1])));
-		// 			if (mbp) {
-		// 				const bp = <DebugProtocol.Breakpoint> new Breakpoint(false);
-		// 				bp.id= mbp.id;
-		// 				this.sendEvent(new BreakpointEvent('removed', bp));
-		// 				reply = `breakpoint deleted`;
-		// 			}
-		// 		} else {
-		// 			const matches = /progress/.exec(args.expression);
-		// 			if (matches && matches.length === 1) {
-		// 				if (this._reportProgress) {
-		// 					reply = `progress started`;
-		// 					this.progressSequence();
-		// 				} else {
-		// 					reply = `frontend doesn't support progress (capability 'supportsProgressReporting' not set)`;
-		// 				}
-		// 			}
-		// 		}
-		// 	}
-		// }
-
-		// response.body = {
-		// 	result: reply ? reply : `evaluate(context: '${args.context}', '${args.expression}')`,
-		// 	variablesReference: 0
-		// };
-		// this.sendResponse(response);
-	// }
-
-	//---- helpers
+	protected evaluateRequest(response: DebugProtocol.EvaluateResponse, args: DebugProtocol.EvaluateArguments): void {
+		if (args.context === 'hover') {
+			this.runnerConnector.request(DebuggerMessage.Evaluate, {
+				frame_id: args.frameId,
+				expression: args.expression
+			}).then(args => {
+				if (args.value !== undefined) {
+					response.body = {
+						result: args.value,
+						variablesReference: 0
+					};
+				}
+				this.sendResponse(response);
+			});
+		}
+	}
 
 	private createSource(filePath: string): Source {
 		return new Source(basename(filePath), this.convertDebuggerPathToClient(filePath), undefined, undefined, 'robot-adapter-data');

@@ -8,7 +8,8 @@ export enum DebuggerMessage {
 	CallStack = "CALL_STACK",
 	SetBreakpoints = "SET_BREAKPOINTS",
 	ClearBreakpoint = "CLEAR_BREAKPOINTS",
-	Variables = "VARIABLES"
+	Variables = "VARIABLES",
+	Evaluate = "EVALUATE"
 }
 
 export enum RunnerMessage {

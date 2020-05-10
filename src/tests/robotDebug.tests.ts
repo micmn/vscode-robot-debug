@@ -165,6 +165,46 @@ describe('Test Robot Debug Adapter', () => {
 		});
 	});
 
+	it('Evaluate variables values on hover', async () => {
+		const robotTest = path.join(DATA_ROOT, 'Evaluate_variables_values.robot');
+		await Promise.all([
+			dc.configurationSequence(),
+			dc.launch({ suite: robotTest, stopOnEntry: true }),
+			dc.waitForEvent('stopped')
+		]);
+		await dc.setBreakpointsRequest({
+			source: {path: robotTest},
+			breakpoints: [{line: 11}, {line: 18}]
+		});
+
+		await dc.continueRequest({threadId: THREAD_ID});
+		let stackFrames = await waitForStop(11, robotTest, 'breakpoint');
+
+		let response = await dc.evaluateRequest({
+			expression: 'random_str',
+			frameId: stackFrames[0].id,
+			context: 'hover'
+		});
+		const randomStrValue = response.body.result;
+
+		await dc.continueRequest({threadId: THREAD_ID});
+		stackFrames = await waitForStop(18, robotTest, 'breakpoint');
+
+		response = await dc.evaluateRequest({
+			expression: 'aaa',
+			frameId: stackFrames[0].id,
+			context: 'hover'
+		});
+		expect(response.body.result).eql(randomStrValue);
+
+		response = await dc.evaluateRequest({
+			expression: 'list',
+			frameId: stackFrames[0].id,
+			context: 'hover'
+		});
+		expect(response.body.result).eql(`[${randomStrValue}, "Value", "CCC", "ABC"]`);
+	});
+
 	it('Step over keyword', async () => {
 		const robotTest = path.join(DATA_ROOT, 'Steps_tests.robot');
 		await Promise.all([
