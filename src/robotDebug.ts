@@ -12,9 +12,6 @@ import { RunnerLauncher } from './runnerLauncher';
 import * as path from 'path';
 const { Subject } = require('await-notify');
 
-// import { createWriteStream } from 'fs-extra';
-// const Log = createWriteStream('C:/Users/michele.mazzoni/Desktop/Workspace/vscode-rf-debug/robot-debug.txt', {flags:'a'})
-
 /**
  * This interface describes the robot-debug specific launch attributes
  * (which are not part of the Debug Adapter Protocol).
