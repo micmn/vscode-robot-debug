@@ -2,6 +2,7 @@ import { EventEmitter } from "events";
 import { ChildProcess, spawn } from "child_process";
 import { logger } from "vscode-debugadapter";
 import * as Path from 'path';
+import * as os from 'os';
 
 export interface IRunnerLauncher extends EventEmitter {
 	start();
@@ -10,15 +11,23 @@ export interface IRunnerLauncher extends EventEmitter {
 export class RunnerLauncher extends EventEmitter implements IRunnerLauncher {
 
 	private robotProcess: ChildProcess;
-	private readonly executable: string = "py";
+	private executable: string;
+	private executableArgs: string[] = [];
 
 	constructor(private runnerPath: string, private port: number, private hostname: string,
 				private suite: string, private workdir: string = Path.dirname(suite)) {
 			super();
+			if (os.platform() === 'win32') {
+				this.executable = 'py';
+				this.executableArgs = ['-3'];
+			}
+			else {
+				this.executable = 'python3'
+			}
 		}
 
 	public start() {
-		const args = ["-3", this.runnerPath, this.hostname, this.port.toString(), this.suite];
+		const args = [...this.executableArgs, this.runnerPath, this.hostname, this.port.toString(), this.suite];
 		logger.log(`Spawning child process ${this.executable} ${args.toString()} with working directory ${this.workdir}`);
 		this.robotProcess = spawn(this.executable, args, {
 			cwd: this.workdir
