@@ -162,7 +162,6 @@ describe('Test Robot Debug Adapter', () => {
 			source: {path: robotTest},
 			breakpoints: [{line: 13}]
 		});
-		await dc.continueRequest({threadId: THREAD_ID});
 
 		let [,stackFrames] = await Promise.all([
 			dc.continueRequest({threadId: THREAD_ID}),
