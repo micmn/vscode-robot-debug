@@ -9,10 +9,11 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
+        os: [ubuntu-latest, windows-latest]
         node-version: [13.x]
 
     steps:
@@ -40,3 +41,4 @@ jobs:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ./coverage/coverage-final.json
         fail_ci_if_error: true
+        env_vars: OS
