@@ -4,6 +4,9 @@ out/
 npm-debug.log
 *.vsix
 *.log
+log.html
+report.html
+output.xml
 
 .nyc_output
 .vscode

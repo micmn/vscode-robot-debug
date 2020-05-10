@@ -22,7 +22,7 @@
 		"tslint": "npx tslint ./src/**/*.ts",
 		"watch": "npx tsc -w -p ./src",
 		"test": "npx mocha -u bdd ./out/tests/",
-		"coverage": "npx nyc --show-process-tree mocha -u bdd ./out/tests/",
+		"coverage": "npx nyc mocha -u bdd ./out/tests/",
 		"package": "npx vsce package",
 		"publish": "npx vsce publish",
 		"py-test": "py -3 -m unittest discover -s ./scripts/tests",
@@ -41,7 +41,8 @@
 		],
 		"reporter": [
 			"text",
-			"html"
+			"html",
+			"json"
 		],
 		"all": true
 	},
