@@ -33,10 +33,12 @@ jobs:
     - run: npm run compile
     - run: npm test
     - name: Generate coverage report
+      if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
         npm run coverage
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
+      if: ${{ matrix.os == 'ubuntu-latest' }}
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ./coverage/coverage-final.json
