@@ -18,7 +18,6 @@ export class RunnerLauncher extends EventEmitter implements IRunnerLauncher {
 				private stopOnEntry: boolean, private suite: string,
 				private workdir: string = Path.dirname(suite)) {
 			super();
-			/* istanbul ignore if */
 			if (os.platform() === 'win32') {
 				this.executable = 'py';
 				this.executableArgs = ['-3'];
